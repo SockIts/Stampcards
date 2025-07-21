@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generated Card</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f4f4;
+      overflow: hidden;
+    }
+
+    .editor-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .form-container {
+      flex: 1;
+      max-width: 50%;
+    }
+
+    .form-container label {
+      display: block;
+      margin: 5px 0 5px;
+      font-weight: bold;
+    }
+
+    .form-container input, .form-container textarea {
+      width: 95%;
+      padding: 5px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .update-button, .copy-code-button, .random-card-button {
+      padding: 10px 10px;
+      background: #569cd6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .update-button:hover, .copy-code-button:hover, .random-card-button:hover {
+      background: #3b78c6;
+    }
+
+    .error-message {
+      color: red;
+      margin: 10px 0;
+    }
+
+    .preview-container {
+      flex: 1;
+    }
+
+    .loading-spinner {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #569cd6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    iframe {
+      width: 100%;
+      height: auto;
+      border: none;
+    }
+
+    @media (max-width: 430px) {
+      .editor-container {
+        flex-direction: column;
+      }
+
+      .form-container {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-container">
+    <div class="form-container">
+      <h2>Basic Trading Card</h2>
+      <label for="card-title">Title:</label>
+      <input type="text" id="card-title" placeholder="Enter title">
+
+      <label for="stamp-number">Stamp Number:</label>
+      <input type="number" id="stamp-number" placeholder="Enter stamp number">
+
+      <label for="image-url">or Image URL (non-stamp):</label>
+      <input type="text" id="image-url" placeholder="Enter image URL">
+
+      <label for="image-description">Image Description:</label>
+      <input type="text" id="image-description" placeholder="Enter image description">
+
+      <label for="card-description">Description:</label>
+      <textarea id="card-description" rows="4" placeholder="Enter description"></textarea>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="update-button" id="update-button">Update</button>
+        <button class="random-card-button" id="random-card-button">Random</button>
+        <button class="copy-code-button" id="copy-code-button">Copy Code</button>
+      </div>
+      <div id="error-message" class="error-message"></div>
+    </div>
+
+    <div class="preview-container" id="preview-container">
+      <div class="loading-spinner" id="loading-spinner"></div>
+      <iframe id="output-frame" sandbox="allow-scripts"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const cardTitleInput = document.getElementById('card-title');
+    const stampNumberInput = document.getElementById('stamp-number');
+    const imageUrlInput = document.getElementById('image-url');
+    const imageDescriptionInput = document.getElementById('image-description');
+    const cardDescriptionInput = document.getElementById('card-description');
+    const updateButton = document.getElementById('update-button');
+    const randomCardButton = document.getElementById('random-card-button');
+    const copyCodeButton = document.getElementById('copy-code-button');
+    const previewContainer = document.getElementById('preview-container');
+    const errorMessageDiv = document.getElementById('error-message');
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function showError(message) {
+      errorMessageDiv.textContent = message;
+      setTimeout(() => errorMessageDiv.textContent = '', 3000);
+    }
+
+    let currentHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generated Card</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      margin-top: 10px;
+      font-family: Arial, sans-serif;
+      image-rendering: -webkit-optimize-contrast;
+      -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: pixelated;
+    }
+
+    #card-svg {
+      width: 100%;
+      max-width: 400px;
+      display: block;
+      margin: 10px auto;
+
+    text.i {
+      font-family: Arial, sans-serif;
+      fill: #000;
+    }
+
+    @media screen and (max-width: 430px) {
+      #card-svg {
+        max-width: 90%;
+      }
+
+      text.i[font-size="24"] {
+        font-size: 20px;
+      }
+
+      text.i[font-size="18"] {
+        font-size: 16px;
+      }
+
+      .description {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg id="card-svg" viewBox="0 0 420 600" width="100%" height="100%">
+    <rect stroke="black" stroke-width="16" fill="#eee" x="10" y="10" width="400" height="580" rx="20"/>
+    <rect fill="black" x="40" y="70" width="340" height="340"/>
+    <image href="https://stampchain.io/content/4b88c75397746d920232d41802264eead532a0ab0efaa1f2bf25b571b7459a63.png" x="50" y="80" width="320" height="320"/>
+    <rect stroke="black" stroke-width="4" fill="#ddd" x="30" y="30" width="360" height="44" rx="10"/>
+    <text class="i" font-size="24" x="50" y="60">Testing</text>
+    <rect stroke="black" stroke-width="4" fill="#ddd" x="30" y="405" width="360" height="40" rx="10"/>
+    <text class="i" font-size="18" x="50" y="430">Testing</text>
+    <rect stroke="black" stroke-width="4" fill="#eee" x="34" y="445" width="350" height="120" rx="10"/>
+    <foreignObject x="50" y="410" width="330" height="200">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial, sans-serif; font-size: 16px; color: black; white-space: pre-wrap;">
+        <p class="description">Enter card description</p>
+      </div>
+    </foreignObject>
+    <rect stroke="black" stroke-width="4" fill="#ddd" x="320" y="530" width="70" height="40" rx="10"/>
+    <text y="558" x="352" class="i" font-size="20" text-anchor="middle">1/1</text>
+  </svg>
+</body>
+</html>
+    `;
+
+    function updatePreview() {
+      const newIframe = document.createElement('iframe');
+      newIframe.id = 'output-frame';
+      newIframe.setAttribute('sandbox', 'allow-scripts');
+      newIframe.style.width = '100%';
+      newIframe.style.height = '600px';
+      newIframe.style.border = 'none';
+      newIframe.srcdoc = currentHtml;
+      previewContainer.replaceChild(newIframe, document.getElementById('output-frame'));
+      loadingSpinner.style.display = 'none';
+    }
+
+    async function fetchStampData(stampNumber) {
+      try {
+        loadingSpinner.style.display = 'block';
+        const response = await fetch(`https://stampchain.io/api/v2/stamps/${stampNumber}`);
+        if (!response.ok) throw new Error('Invalid stamp number');
+        const data = await response.json();
+        return {
+          stampUrl: data.data.stamp.stamp_url,
+          supply: data.data.stamp.supply,
+          stampNumber: stampNumber
+        };
+      } catch (error) {
+        throw new Error('Failed to fetch stamp data. Please check the stamp number.');
+      } finally {
+        loadingSpinner.style.display = 'none';
+      }
+    }
+
+    async function fetchRandomStampData() {
+      try {
+        loadingSpinner.style.display = 'block';
+        const maxResponse = await fetch('https://stampchain.io/api/v2/stamps?limit=1&page=1&sort=ASC');
+        if (!maxResponse.ok) throw new Error('Failed to fetch max stamp info');
+        const maxData = await maxResponse.json();
+        const randomPage = Math.floor(Math.random() * maxData.totalPages) + 1;
+        const response = await fetch(`https://stampchain.io/api/v2/stamps?limit=1&page=${randomPage}&sort=ASC`);
+        if (!response.ok) throw new Error('Failed to fetch random stamp');
+        const data = await response.json();
+        return {
+          stampUrl: data.data[0].stamp_url,
+          supply: data.data[0].supply,
+          stampNumber: data.data[0].stamp
+        };
+      } catch (error) {
+        throw new Error('Failed to fetch random stamp data.');
+      } finally {
+        loadingSpinner.style.display = 'none';
+      }
+    }
+
+    async function updateCard(stampData) {
+      const newTitle = escapeHtml(cardTitleInput.value.trim() || 'Enter card title');
+      const newImageDescription = escapeHtml(imageDescriptionInput.value.trim() || 'Enter image description');
+      const newDescription = escapeHtml(cardDescriptionInput.value.trim() || 'Enter card description');
+      const newCount = `1/${stampData.supply}`;
+
+      currentHtml = currentHtml
+        .replace(/<text class="i" font-size="24" x="50" y="60">[\s\S]*?<\/text>/, 
+                 `<text class="i" font-size="24" x="50" y="60">${newTitle}</text>`)
+        .replace(/<image href="[^"]*"/, 
+                 `<image href="${stampData.stampUrl}"`)
+        .replace(/<text class="i" font-size="18" x="50" y="430">[\s\S]*?<\/text>/, 
+                 `<text class="i" font-size="18" x="50" y="430">${newImageDescription}</text>`)
+        .replace(/<p class="description">[\s\S]*?<\/p>/, 
+                 `<p class="description">${newDescription}</p>`)
+        .replace(/<text y="558" x="352" class="i" font-size="20" text-anchor="middle">[\s\S]*?<\/text>/, 
+                 `<text y="558" x="352" class="i" font-size="20" text-anchor="middle">${newCount}</text>`);
+
+      updatePreview();
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    const debouncedUpdateCard = debounce(async () => {
+      const stampNumber = stampNumberInput.value.trim();
+      const imageUrl = imageUrlInput.value.trim();
+
+      if (imageUrl) {
+        try {
+          // Validate the image URL
+          const response = await fetch(imageUrl, { method: 'HEAD' });
+          if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) {
+            throw new Error('Invalid image URL');
+          }
+          await updateCard({ stampUrl: imageUrl, supply: 1 });
+        } catch (error) {
+          showError('Invalid image URL. Please check the URL.');
+        }
+      } else if (!stampNumber || isNaN(stampNumber) || stampNumber <= 0) {
+        showError('Please enter a valid positive stamp number or a valid image URL.');
+        return;
+      } else {
+        try {
+          const stampData = await fetchStampData(stampNumber);
+          await updateCard(stampData);
+        } catch (error) {
+          showError(error.message);
+        }
+      }
+    }, 500);
+
+    const debouncedRandomCard = debounce(async () => {
+      try {
+        const stampData = await fetchRandomStampData();
+        stampNumberInput.value = stampData.stampNumber;
+        imageUrlInput.value = ''; // Clear image URL when fetching random stamp
+        await updateCard(stampData);
+      } catch (error) {
+        showError(error.message);
+      }
+    }, 500);
+
+    updateButton.addEventListener('click', debouncedUpdateCard);
+    randomCardButton.addEventListener('click', debouncedRandomCard);
+
+    copyCodeButton.addEventListener('click', () => {
+      navigator.clipboard.writeText(currentHtml)
+        .then(() => {
+          showError('HTML code copied to clipboard!');
+          errorMessageDiv.style.color = 'green';
+          setTimeout(() => errorMessageDiv.style.color = 'red', 3000);
+        })
+        .catch(() => showError('Failed to copy code.'));
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>
