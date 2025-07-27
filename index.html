@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Generated Card</title>
   <style>
     body {
@@ -28,18 +28,15 @@
 
     #card-image {
       position: absolute;
-      top: 13%; /* 70/600 of SVG height */
-      left: 12%; /* 40/420 of SVG width */
-      width: 76%; /* 340/420 of SVG width */
-      height: 54%; /* 340/600 of SVG height */
+      top: 70px;
+      left: 40px;
+      width: 340px;
+      height: 340px;
       object-fit: contain;
-      image-rendering: optimizeSpeed;
-      image-rendering: -moz-crisp-edges;
       image-rendering: -webkit-optimize-contrast;
-      image-rendering: optimize-contrast;
       image-rendering: crisp-edges;
       image-rendering: pixelated;
-      -ms-interpolation-mode: nearest-neighbor;
+      will-change: transform;
     }
 
     text.i {
@@ -53,10 +50,10 @@
       }
 
       #card-image {
-        top: 13%;
-        left: 12%;
-        width: 76%;
-        height: 54%;
+        top: calc(70px * 0.9);
+        left: calc(40px * 0.9);
+        width: calc(340px * 0.9);
+        height: calc(340px * 0.9);
       }
 
       text.i[font-size="24"] {
