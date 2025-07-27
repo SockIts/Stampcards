@@ -156,6 +156,38 @@
       setTimeout(() => errorMessageDiv.textContent = '', 3000);
     }
 
+    // Function to validate and convert base64
+    function isValidBase64Image(base64String) {
+      try {
+        const byteCharacters = atob(base64String.split(',')[1] || base64String);
+        const byteNumbers = new Uint8Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const blob = new Blob([byteNumbers], { type: 'image/png' });
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.src = url;
+        return new Promise((resolve) => {
+          img.onload = () => resolve(url);
+          img.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return Promise.resolve(null);
+      }
+    }
+
+    // Function to convert URL to base64
+    async function urlToBase64(url) {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+
     let currentHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -176,7 +208,13 @@
       max-width: 400px;
       display: block;
       margin: 10px auto;
+      image-rendering: optimizeSpeed;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: optimize-contrast;
+      image-rendering: crisp-edges;
       image-rendering: pixelated;
+      -ms-interpolation-mode: nearest-neighbor;
     }
 
     text.i {
@@ -207,7 +245,9 @@
   <svg id="card-svg" viewBox="0 0 420 600" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     <rect stroke="black" stroke-width="16" fill="#eee" x="10" y="10" width="400" height="580" rx="20"/>
     <rect fill="black" x="40" y="70" width="340" height="340"/>
-    <image href="https://stampchain.io/content/4b88c75397746d920232d41802264eead532a0ab0efaa1f2bf25b571b7459a63.png" x="50" y="80" width="320" height="320" preserveAspectRatio="xMidYMid meet" style="image-rendering: pixelated;"/>
+    <foreignObject x="50" y="80" width="320" height="320">
+      <img xmlns="http://www.w3.org/1999/xhtml" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" width="100%" height="100%" style="image-rendering: optimizeSpeed; image-rendering: -moz-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: optimize-contrast; image-rendering: crisp-edges; image-rendering: pixelated; -ms-interpolation-mode: nearest-neighbor;" />
+    </foreignObject>
     <rect stroke="black" stroke-width="4" fill="#ddd" x="30" y="30" width="360" height="44" rx="10"/>
     <text class="i" font-size="24" x="50" y="60">Testing</text>
     <rect stroke="black" stroke-width="4" fill="#ddd" x="30" y="405" width="360" height="40" rx="10"/>
@@ -244,6 +284,7 @@
         if (!response.ok) throw new Error('Invalid stamp number');
         const data = await response.json();
         return {
+          stampBase64: data.data.stamp.stamp_base64,
           stampUrl: data.data.stamp.stamp_url,
           supply: data.data.stamp.supply,
           stampNumber: stampNumber
@@ -266,6 +307,7 @@
         if (!response.ok) throw new Error('Failed to fetch random stamp');
         const data = await response.json();
         return {
+          stampBase64: data.data[0].stamp_base64,
           stampUrl: data.data[0].stamp_url,
           supply: data.data[0].supply,
           stampNumber: data.data[0].stamp
@@ -283,11 +325,25 @@
       const newDescription = escapeHtml(cardDescriptionInput.value.trim() || 'Enter card description');
       const newCount = `1/${stampData.supply}`;
 
+      let base64Image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='; // Default placeholder
+
+      // Validate stamp_base64 and use it if valid, otherwise convert stamp_url
+      if (stampData.stampBase64) {
+        const validBase64 = await isValidBase64Image(`data:image/png;base64,${stampData.stampBase64}`);
+        if (validBase64) {
+          base64Image = `data:image/png;base64,${stampData.stampBase64}`;
+        } else if (stampData.stampUrl) {
+          base64Image = await urlToBase64(stampData.stampUrl);
+        }
+      } else if (stampData.stampUrl) {
+        base64Image = await urlToBase64(stampData.stampUrl);
+      }
+
       currentHtml = currentHtml
         .replace(/<text class="i" font-size="24" x="50" y="60">[\s\S]*?<\/text>/, 
                  `<text class="i" font-size="24" x="50" y="60">${newTitle}</text>`)
-        .replace(/<image href="[^"]*"/, 
-                 `<image href="${stampData.stampUrl}"`)
+        .replace(/<img [^>]*src="[^"]*"/, 
+                 `<img xmlns="http://www.w3.org/1999/xhtml" src="${base64Image}"`)
         .replace(/<text class="i" font-size="18" x="50" y="430">[\s\S]*?<\/text>/, 
                  `<text class="i" font-size="18" x="50" y="430">${newImageDescription}</text>`)
         .replace(/<p class="description">[\s\S]*?<\/p>/, 
@@ -316,12 +372,11 @@
 
       if (imageUrl) {
         try {
-          // Validate the image URL
           const response = await fetch(imageUrl, { method: 'HEAD' });
           if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) {
             throw new Error('Invalid image URL');
           }
-          await updateCard({ stampUrl: imageUrl, supply: 1 });
+          await updateCard({ stampBase64: '', stampUrl: imageUrl, supply: 1 });
         } catch (error) {
           showError('Invalid image URL. Please check the URL.');
         }
