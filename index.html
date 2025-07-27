@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
   <title>Generated Card</title>
   <style>
     body {
@@ -26,9 +26,9 @@
 
     #card-title {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 320px;
+      top: 30px;
+      left: 30px;
+      width: 360px;
       height: 44px;
       background-color: #ddd;
       border: 2px solid black;
@@ -43,22 +43,24 @@
     #card-image {
       position: absolute;
       top: 70px;
-      left: 25px;
-      width: 330px;
-      height: 330px;
+      left: 40px;
+      width: 340px;
+      height: 340px;
       object-fit: contain;
       background-color: #000;
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
       image-rendering: pixelated;
       will-change: transform;
+      -webkit-transform: translateZ(0); /* Force hardware acceleration */
+      transform: translateZ(0);
     }
 
     #image-description {
       position: absolute;
       top: 405px;
-      left: 20px;
-      width: 320px;
+      left: 30px;
+      width: 360px;
       height: 40px;
       background-color: #ddd;
       border: 2px solid black;
@@ -73,9 +75,9 @@
     #card-description {
       position: absolute;
       top: 445px;
-      left: 14px;
-      width: 340px;
-      height: 100px;
+      left: 34px;
+      width: 350px;
+      height: 120px;
       background-color: #eee;
       border: 2px solid black;
       border-radius: 10px;
@@ -89,7 +91,7 @@
     #card-number {
       position: absolute;
       top: 530px;
-      left: 310px;
+      left: 320px;
       width: 70px;
       height: 40px;
       background-color: #ddd;
@@ -101,14 +103,60 @@
       font-size: 20px;
       color: #000;
     }
+
+    @media screen and (max-width: 430px) {
+      #card-container {
+        max-width: 90%;
+        height: 540px; /* 600px * 0.9 */
+      }
+
+      #card-title {
+        top: 27px; /* 30px * 0.9 */
+        left: 27px; /* 30px * 0.9 */
+        width: 324px; /* 360px * 0.9 */
+        height: 39.6px; /* 44px * 0.9 */
+        font-size: 20px;
+      }
+
+      #card-image {
+        top: 63px; /* 70px * 0.9 */
+        left: 36px; /* 40px * 0.9 */
+        width: 306px; /* 340px * 0.9 */
+        height: 306px; /* 340px * 0.9 */
+      }
+
+      #image-description {
+        top: 364.5px; /* 405px * 0.9 */
+        left: 27px; /* 30px * 0.9 */
+        width: 324px; /* 360px * 0.9 */
+        height: 36px; /* 40px * 0.9 */
+        font-size: 16px;
+      }
+
+      #card-description {
+        top: 400.5px; /* 445px * 0.9 */
+        left: 30.6px; /* 34px * 0.9 */
+        width: 315px; /* 350px * 0.9 */
+        height: 108px; /* 120px * 0.9 */
+        font-size: 14px;
+      }
+
+      #card-number {
+        top: 477px; /* 530px * 0.9 */
+        left: 288px; /* 320px * 0.9 */
+        width: 63px; /* 70px * 0.9 */
+        height: 36px; /* 40px * 0.9 */
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="card-container">
-    <div id="card-title">Enter card title</div>
+    <div id="card-title">STAMPEPES</div>
     <img id="card-image" src="https://stampchain.io/stamps/ada10fea941f4e50c437193beb3b7d883a7a69ca4635728e7505943e0fbb7fe9.svg" alt="Card Image">
-    <div id="image-description">Enter image description</div>
-    <div id="card-description">Enter card description</div>
+    <div id="image-description">STAMPEPES SRC721</div>
+    <div id="card-description">STAMPEPES SRC721 is the first 10K collection in Stamp using SRC721 token standard - provided by stampchain.io</div>
     <div id="card-number">1/1</div>
   </div>
 </body>
